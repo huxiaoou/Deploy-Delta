@@ -307,7 +307,6 @@ if __name__ == "__main__":
 
         main_process_optimize_sec_wgt(
             span=span,
-            codes=cfg.codes,
             sectors=sectors,
             tgt_rets=cfg.tgt_rets,
             cfg_optimizer=cfg.optimizer,

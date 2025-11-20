@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Literal
 from transmatrix import SignalMatrix
 from transmatrix.strategy import SignalStrategy
-from transmatrix.data_api import create_factor_table, save_factor
+from transmatrix.data_api import create_factor_table
 from transmatrix.event.scheduler import PeriodScheduler
 from qtools_sxzq.qdata import CDataDescriptor
 from typedef import CCfgOptimizer
@@ -49,12 +49,10 @@ class COptimizerSecWgt(SignalStrategy):
         self.create_factor_table(self.tgt_rets)
 
     def on_day_end(self):
-        # print(f"{self.time} for every day")
         for tgt_ret in self.tgt_rets:
-            self.snapshots[tgt_ret][self.time] = self.opt_val[tgt_ret]
+            self.update_factor(tgt_ret, self.opt_val[tgt_ret])
 
     def on_optimize_date_end(self):
-        # print(f"{self.time} for optimizing date")
         for tgt_ret in self.tgt_rets:
             net_ret_data: pd.DataFrame = self.sret_data.get_window_df(
                 field=tgt_ret,
@@ -84,23 +82,9 @@ class COptimizerSecWgt(SignalStrategy):
         else:
             raise ValueError(f"Invalid method = {method}")
 
-    def save_to_db(self, table_name: str, db_name: str):
-        data = {}
-        for tgt_ret in self.tgt_rets:
-            data[tgt_ret] = pd.DataFrame.from_dict(
-                self.snapshots[tgt_ret],
-                orient="index",
-            ).stack()
-        data = pd.DataFrame(data).reset_index().rename(columns={"level_0": "datetime", "level_1": "code"})
-        dst_path = f"{db_name}.{table_name}"
-        create_factor_table(dst_path)
-        save_factor(table_name=dst_path, data=data)
-        return 0
-
 
 def main_process_optimize_sec_wgt(
     span: tuple[str, str],
-    codes: list[str],
     sectors: list[str],
     tgt_rets: list[str],
     cfg_optimizer: CCfgOptimizer,
@@ -122,7 +106,7 @@ def main_process_optimize_sec_wgt(
     """
     cfg = {
         "span": span,
-        "codes": codes,
+        "codes": sectors,
         "cache_data": False,
         "progress_bar": True,
     }
@@ -141,5 +125,7 @@ def main_process_optimize_sec_wgt(
     mat.run()
 
     # --- save
-    optimizer.save_to_db(table_optimize, db_name=dst_db)
+    dst_path = f"{dst_db}.{table_optimize}"
+    create_factor_table(dst_path)
+    optimizer.save_factors(dst_path)
     return 0
