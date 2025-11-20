@@ -169,17 +169,17 @@ if __name__ == "__main__":
             )
         elif args.type == "stg":
             from solutions.signals import main_process_signals_stg
+            from config import sectors, universe_sector
 
             main_process_signals_stg(
                 span=span,
                 codes=codes,
                 tgt_rets=cfg.tgt_rets,
-                cfg_factors=cfg.factors,
-                cfg_qsim=cfg.qsim,
-                data_desc_sig_fac=data_desc_sig_fac,
-                data_desc_css=data_desc_css,
-                data_desc_icov=data_desc_icov,
+                sectors=sectors,
+                universe_sector=universe_sector,
+                data_desc_pv=data_desc_preprocess,
                 data_desc_optimize=data_desc_optimize,
+                data_desc_css=data_desc_css,
                 data_desc_avlb=data_desc_avlb,
                 dst_db=cfg_dbs.user,
                 table_sig_stg=cfg_tables.sig_stg,
