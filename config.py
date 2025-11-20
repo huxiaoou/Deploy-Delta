@@ -1,7 +1,7 @@
 import yaml
 from qtools_sxzq.qwidgets import check_and_mkdir
 from qtools_sxzq.qdata import CDataDescriptor, CMarketDescriptor
-from typedef import TUniverse, CCfgInstru
+from typedef import TUniverse, CCfgInstru, TSectors
 from typedef_factor import CCfgFactors
 from typedef import CCfgAvlb, CCfgCss, CCfgICov, CCfgQSim, CCfgOptimizer
 from typedef import CCfgProj, CCfgTables, CCfgDbs
@@ -12,6 +12,7 @@ with open("config.yaml", "r") as f:
 
 universe: TUniverse = {k: CCfgInstru(**v) for k, v in _config["universe"].items()}
 universe_sector: dict[str, str] = {k: v.sectorL1 for k, v in universe.items()}
+sectors: TSectors = sorted(list(set([v.sectorL1 for v in universe.values()])))
 
 cfg_factors = CCfgFactors(algs_dir="factor_algs", cfg_data=_config["factors"])
 
@@ -163,6 +164,8 @@ if __name__ == "__main__":
         i += 1
     print(sep("cfg"))
     print(cfg)
+    print(sep("sectors"))
+    print(sectors)
     print(sep("cfg_tables"))
     print(cfg_tables)
     print(sep("cfg_dbs"))

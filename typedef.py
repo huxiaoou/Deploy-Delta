@@ -12,6 +12,7 @@ class CCfgInstru:
 
 TInstruName = str
 TUniverse = dict[TInstruName, CCfgInstru]
+TSectors = list[str]
 
 
 @dataclass(frozen=True)
