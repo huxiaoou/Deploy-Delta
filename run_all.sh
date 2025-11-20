@@ -31,6 +31,7 @@ cls_prv_cache
 echo "$(date +'%Y-%m-%d %H:%M:%S') old data removed"
 
 bgn_date_avlb="20160104"
+bgn_date_icov="20160503"
 bgn_date_fac="20170103"
 bgn_date_opt="20171009"
 bgn_date="20180102"
@@ -41,7 +42,7 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') available universe generated"
 python main.py --bgn $bgn_date_avlb --end $end_date css
 echo "$(date +'%Y-%m-%d %H:%M:%S') css generated"
 
-python main.py --bgn $bgn_date_avlb --end $end_date icov
+python main.py --bgn $bgn_date_icov --end $end_date icov
 echo "$(date +'%Y-%m-%d %H:%M:%S') icov generated"
 
 python main.py --bgn $bgn_date_fac --end $end_date factors --type raw
