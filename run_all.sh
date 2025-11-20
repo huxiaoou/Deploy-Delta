@@ -61,8 +61,8 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') srets generated"
 # python main.py --bgn $bgn_date_fac --end $end_date simulations --type fac
 # echo "$(date +'%Y-%m-%d %H:%M:%S') quick simulation for single factor"
 
-# python main.py --bgn $bgn_date_opt --end $end_date optimize
-# echo "$(date +'%Y-%m-%d %H:%M:%S') weights for factors portfolios optimized"
+python main.py --bgn $bgn_date_opt --end $end_date optimize
+echo "$(date +'%Y-%m-%d %H:%M:%S') weights for factors portfolios optimized"
 
 # python main.py --bgn $bgn_date --end $end_date signals --type stg
 # echo "$(date +'%Y-%m-%d %H:%M:%S') signals optimized"

@@ -6,30 +6,31 @@ from transmatrix.strategy import SignalStrategy
 from transmatrix.data_api import create_factor_table, save_factor
 from transmatrix.event.scheduler import PeriodScheduler
 from qtools_sxzq.qdata import CDataDescriptor
-from typedef import CCfgOptimizer, CCfgFactors
+from typedef import CCfgOptimizer
 
 
-class COptimizerFacWgt(SignalStrategy):
+class COptimizerSecWgt(SignalStrategy):
     CONST_SAFE_RET_LENGTH = 10
     CONST_ANNUAL_FAC = 250
 
     def __init__(
         self,
-        cfg_factors: CCfgFactors,
+        sectors: list[str],
         tgt_rets: list[str],
         cfg_optimizer: CCfgOptimizer,
-        data_desc_sim: CDataDescriptor,
+        data_desc_srets: CDataDescriptor,
     ):
+        self.data_desc_srets: CDataDescriptor
         super().__init__(
-            cfg_factors,
+            sectors,
             tgt_rets,
             cfg_optimizer,
-            data_desc_sim,
+            data_desc_srets,
         )
-        self.factors = cfg_factors.to_list()
-        p = len(self.factors)
+        self.sectors = sectors
+        p = len(self.sectors)
         self.opt_val: dict[str, pd.Series] = {
-            tgt_ret: pd.Series(np.ones(p) / p, index=self.factors) for tgt_ret in self.tgt_rets
+            tgt_ret: pd.Series(np.zeros(p), index=self.sectors) for tgt_ret in self.tgt_rets
         }
         self.snapshots: dict[str, dict] = {tgt_ret: {} for tgt_ret in self.tgt_rets}
 
@@ -42,7 +43,7 @@ class COptimizerFacWgt(SignalStrategy):
         self.add_scheduler(scheduler=scheduler, handler=self.on_optimize_date_end)
 
         # subscribe data
-        self.subscribe_data("sim_data", self.data_desc_sim.to_args())
+        self.subscribe_data("sret_data", self.data_desc_srets.to_args())
 
         # create factor tables to record factor
         self.create_factor_table(self.tgt_rets)
@@ -55,34 +56,31 @@ class COptimizerFacWgt(SignalStrategy):
     def on_optimize_date_end(self):
         # print(f"{self.time} for optimizing date")
         for tgt_ret in self.tgt_rets:
-            slc_codes = [f"{fac}-{tgt_ret}" for fac in self.factors]
-            net_ret_data: pd.DataFrame = self.sim_data.get_window_df(
-                field="net_ret",
+            net_ret_data: pd.DataFrame = self.sret_data.get_window_df(
+                field=tgt_ret,
                 length=self.cfg_optimizer.window,
-                codes=slc_codes,
-            ).rename(
-                columns={k: v for k, v in zip(slc_codes, self.factors)},
+                codes=self.sectors,
             )
             opt_val = self.core(ret_data=net_ret_data, method="sg")
-            default_val = pd.Series({k: 0 for k in self.factors})
+            default_val = pd.Series({k: 0 for k in self.sectors})
             default_val.update(opt_val)
             self.opt_val[tgt_ret] = default_val
 
     def core(self, ret_data: pd.DataFrame, method: Literal["eq", "sd", "sg"]) -> pd.Series:
         if method == "eq":
             n = ret_data.shape[1]
-            return pd.Series(data=np.ones(n) / n, index=self.factors)
+            return pd.Series(data=np.ones(n) / n, index=self.sectors)
         elif method == "sd":
             sd: pd.Series = ret_data.std()
             w: pd.Series = 1 / sd
             wgt = w / w.abs().sum()
-            return wgt[self.factors]
+            return wgt[self.sectors]
         elif method == "sg":
-            sg: pd.Series = np.sign(ret_data.mean())
+            sg: pd.Series = np.sign(ret_data.mean())  # type:ignore
             sd: pd.Series = ret_data.std()
             w: pd.Series = sg / sd
             wgt = w / w.abs().sum()
-            return wgt[self.factors]
+            return wgt[self.sectors]
         else:
             raise ValueError(f"Invalid method = {method}")
 
@@ -100,13 +98,13 @@ class COptimizerFacWgt(SignalStrategy):
         return 0
 
 
-def main_process_optimize_fac_wgt(
+def main_process_optimize_sec_wgt(
     span: tuple[str, str],
     codes: list[str],
-    cfg_factors: CCfgFactors,
+    sectors: list[str],
     tgt_rets: list[str],
     cfg_optimizer: CCfgOptimizer,
-    data_desc_sim: CDataDescriptor,
+    data_desc_srets: CDataDescriptor,
     dst_db: str,
     table_optimize: str,
 ):
@@ -131,11 +129,11 @@ def main_process_optimize_fac_wgt(
 
     # --- run
     mat = SignalMatrix(cfg)
-    optimizer = COptimizerFacWgt(
-        cfg_factors=cfg_factors,
+    optimizer = COptimizerSecWgt(
+        sectors=sectors,
         tgt_rets=tgt_rets,
         cfg_optimizer=cfg_optimizer,
-        data_desc_sim=data_desc_sim,
+        data_desc_srets=data_desc_srets,
     )
     optimizer.set_name("optimizer")
     mat.add_component(optimizer)

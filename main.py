@@ -61,6 +61,7 @@ if __name__ == "__main__":
         data_desc_avlb,
         data_desc_icov,
         data_desc_css,
+        data_desc_srets,
         data_desc_fac_raw,
         data_desc_fac_nrm,
         data_desc_sig_fac,
@@ -301,15 +302,16 @@ if __name__ == "__main__":
             mulit_evaluator.main()
 
     elif args.switch == "optimize":
-        from solutions.optimize import main_process_optimize_fac_wgt
+        from solutions.optimize import main_process_optimize_sec_wgt
+        from config import sectors
 
-        main_process_optimize_fac_wgt(
+        main_process_optimize_sec_wgt(
             span=span,
-            codes=cfg.sim_codes_fac,  # codes here are different from usual. they have format like "mtm-opn"
-            cfg_factors=cfg.factors,
+            codes=cfg.codes,
+            sectors=sectors,
             tgt_rets=cfg.tgt_rets,
             cfg_optimizer=cfg.optimizer,
-            data_desc_sim=data_desc_sim_fac,
+            data_desc_srets=data_desc_srets,
             dst_db=cfg_dbs.user,
             table_optimize=cfg_tables.optimize,
         )
