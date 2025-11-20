@@ -42,6 +42,9 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') available universe generated"
 python main.py --bgn $bgn_date_avlb --end $end_date css
 echo "$(date +'%Y-%m-%d %H:%M:%S') css generated"
 
+python main.py --bgn $bgn_date_avlb --end $end_date srets
+echo "$(date +'%Y-%m-%d %H:%M:%S') css generated"
+
 python main.py --bgn $bgn_date_icov --end $end_date icov
 echo "$(date +'%Y-%m-%d %H:%M:%S') icov generated"
 

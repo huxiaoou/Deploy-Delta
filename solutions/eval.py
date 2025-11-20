@@ -5,6 +5,47 @@ from qtools_sxzq.qplot import CPlotLines
 from qtools_sxzq.qevaluation import CNAV
 
 
+def plot_nav(
+    nav_data: pd.DataFrame,
+    xtick_count_min: int,
+    ylim: tuple[float, float],
+    ytick_spread: float,
+    fig_name: str,
+    save_dir: str,
+    line_style: list = None,
+    line_color: list = None,
+    colormap: str = "jet",
+):
+    artist = CPlotLines(
+        plot_data=nav_data,
+        line_width=1.2,
+        line_style=line_style,
+        line_color=line_color,
+        colormap=colormap,
+    )
+    artist.plot()
+    artist.set_axis_x(
+        xtick_count=min(xtick_count_min, len(nav_data)),
+        xtick_label_size=12,
+        xtick_label_rotation=90,
+        xgrid_visible=True,
+    )
+    artist.set_axis_y(
+        ylim=ylim,
+        ytick_spread=ytick_spread,
+        update_yticklabels=False,
+        ygrid_visible=True,
+    )
+    check_and_mkdir(save_dir)
+    artist.save(
+        fig_name=fig_name,
+        fig_save_dir=save_dir,
+        fig_save_type="pdf",
+    )
+    artist.close()
+    return
+
+
 class CMultiEvaluator:
     SEP = "=" * 60
     INDICATORS = ["hpr", "retMean", "retStd", "retAnnual", "volAnnual", "sharpe", "calmar", "mdd"]
@@ -86,42 +127,6 @@ class CMultiEvaluator:
         print(rets_corr)
         return
 
-    def plot_rets(
-        self,
-        nav_data: pd.DataFrame,
-        xtick_count_min: int,
-        ylim: tuple[float, float],
-        ytick_spread: float,
-        fig_name: str,
-    ):
-        artist = CPlotLines(
-            plot_data=nav_data,
-            line_width=2,
-            line_style=["-.", "-.", "-"],
-            line_color=["#6495ED", "#000080", "#800000"],
-        )
-        artist.plot()
-        artist.set_axis_x(
-            xtick_count=min(xtick_count_min, len(nav_data)),
-            xtick_label_size=12,
-            xtick_label_rotation=90,
-            xgrid_visible=True,
-        )
-        artist.set_axis_y(
-            ylim=ylim,
-            ytick_spread=ytick_spread,
-            update_yticklabels=False,
-            ygrid_visible=True,
-        )
-        check_and_mkdir(dst_dir := os.path.join(self.project_data_dir, "plots"))
-        artist.save(
-            fig_name=fig_name,
-            fig_save_dir=dst_dir,
-            fig_save_type="pdf",
-        )
-        artist.close()
-        return
-
     def main(self):
         res: dict[str, dict] = {}
         ret_data = {}
@@ -144,22 +149,24 @@ class CMultiEvaluator:
 
         # plot-ALL
         nav_data = (portfolios_rets + 1).cumprod()
-        self.plot_rets(
+        plot_nav(
             nav_data=nav_data,
             xtick_count_min=60,
             ylim=(1.0, 1.9),
             ytick_spread=0.10,
             fig_name=f"sim_cmplx.{self.save_id}",
+            save_dir=os.path.join(self.project_data_dir, "plots"),
         )
 
         # plot-SINCE
         latest_ret = portfolios_rets.truncate(before="2025-01-01")
         latest_nav = (latest_ret + 1).cumprod()
-        self.plot_rets(
+        plot_nav(
             nav_data=latest_nav,
             xtick_count_min=20,
             ylim=(0.99, 1.06),
             ytick_spread=0.005,
             fig_name=f"sim_cmplx_since_2025.{self.save_id}",
+            save_dir=os.path.join(self.project_data_dir, "plots"),
         )
         return 0

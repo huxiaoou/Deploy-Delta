@@ -22,6 +22,9 @@ def parse_args():
     # swithc: icov
     arg_parser_subs.add_parser(name="icov", help="Calculate instruments covariance")
 
+    # swithc: srets
+    arg_parser_subs.add_parser(name="srets", help="Calculate sector returns")
+
     # switch: factors
     arg_parser_sub = arg_parser_subs.add_parser(name="factors", help="Calculate factors")
     arg_parser_sub.add_argument("--type", type=str, choices=("raw", "nrm"))
@@ -94,6 +97,21 @@ if __name__ == "__main__":
             data_desc_avlb=data_desc_avlb,
             dst_db=cfg_dbs.user,
             table_css=cfg_tables.css,
+        )
+    elif args.switch == "srets":
+        from solutions.srets import main_process_srets
+        from config import universe_sector
+
+        data_desc_preprocess.lag, data_desc_avlb.lag = 1, 1
+        main_process_srets(
+            span=span,
+            codes=codes,
+            universe_sector=universe_sector,
+            data_desc_pv=data_desc_preprocess,
+            data_desc_avlb=data_desc_avlb,
+            dst_db=cfg_dbs.user,
+            table_srets=cfg_tables.srets,
+            project_data_dir=cfg.project_data_dir,
         )
     elif args.switch == "icov":
         from solutions.icov import main_process_icov

@@ -83,6 +83,7 @@ class CCfgTables:
     avlb: str
     css: str
     icov: str
+    srets: str
     fac_raw: str
     fac_nrm: str
     sig_fac: str

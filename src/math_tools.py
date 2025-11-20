@@ -17,6 +17,14 @@ def gen_exp_wgt(k: int, rate: float = 0.30) -> np.ndarray:
     return wgt
 
 
+def weighted_mean(x: Union[pd.Series, pd.DataFrame], wgt: pd.Series = None) -> float:
+    if wgt is None:
+        return x.mean()
+    else:
+        w = wgt / wgt.abs().sum()
+        return w @ x
+
+
 def weighted_volatility(x: pd.Series, wgt: pd.Series = None) -> float:
     if wgt is None:
         return x.std()

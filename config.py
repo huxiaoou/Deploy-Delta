@@ -39,6 +39,7 @@ cfg_tables = CCfgTables(
     avlb=f"{cfg.pid}_tbl_avlb_{cfg.vid}",
     css=f"{cfg.pid}_tbl_css_{cfg.vid}",
     icov=f"{cfg.pid}_tbl_icov_{cfg.vid}",
+    srets=f"{cfg.pid}_tbl_srets_{cfg.vid}",
     fac_raw=f"{cfg.pid}_tbl_fac_raw_{cfg.vid}",
     fac_nrm=f"{cfg.pid}_tbl_fac_nrm_{cfg.vid}",
     sig_fac=f"{cfg.pid}_tbl_sig_fac_{cfg.vid}",
@@ -87,6 +88,14 @@ data_desc_icov = CDataDescriptor(
     table_name=cfg_tables.icov,
     codes=cfg.codes,
     fields=[_.lower() for _ in cfg.codes],
+    lag=60,
+    data_view_type="data3d",
+)
+data_desc_srets = CDataDescriptor(
+    db_name=cfg_dbs.user,
+    table_name=cfg_tables.srets,
+    codes=sectors,
+    fields=["opn", "cls"],
     lag=60,
     data_view_type="data3d",
 )
