@@ -62,12 +62,12 @@ avlb:
   threshold: 1_000_000_000.00
   keep: 240
   oi_cap_ratio: 0.01
+icov:
+  win: 60
 css:
   vma_win: 5
   vma_threshold: 0.0175
   vma_wgt: 0.2
-icov:
-  win: 60
 factors:
   basis:
     args: 60

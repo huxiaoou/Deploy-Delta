@@ -58,12 +58,10 @@ def plot(df: pd.DataFrame, project_data_dir: str):
         ret_data = pd.pivot_table(data=df, index="datetime", columns="code", values=ret)
         ret_data.index = ret_data.index.map(lambda z: z.strftime("%Y%m%d"))
         nav_data = ret_data.cumsum()
-        yl, yu = nav_data.min().min(), nav_data.max().max()
-        yl, yu = (int(yl / 0.25) - 1) * 0.25, (int(yu / 0.25) + 1) * 0.25
         plot_nav(
             nav_data=nav_data,
             xtick_count_min=60,
-            ylim=(yl, yu),
+            ylim=(-0.25, 3.50),
             ytick_spread=0.25,
             fig_name=f"sector_returns.{ret}",
             save_dir=save_dir,

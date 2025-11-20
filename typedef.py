@@ -81,8 +81,8 @@ class CCfgProj:
 @dataclass(frozen=True)
 class CCfgTables:
     avlb: str
-    css: str
     icov: str
+    css: str
     srets: str
     fac_raw: str
     fac_nrm: str

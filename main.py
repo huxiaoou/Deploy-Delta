@@ -16,11 +16,11 @@ def parse_args():
     # switch: available
     arg_parser_subs.add_parser(name="available", help="Calculate available universe")
 
-    # switch: css
-    arg_parser_subs.add_parser(name="css", help="Calculate cross section stats")
-
     # swithc: icov
     arg_parser_subs.add_parser(name="icov", help="Calculate instruments covariance")
+
+    # switch: css
+    arg_parser_subs.add_parser(name="css", help="Calculate cross section stats")
 
     # swithc: srets
     arg_parser_subs.add_parser(name="srets", help="Calculate sector returns")
@@ -59,8 +59,8 @@ if __name__ == "__main__":
         data_desc_pv1m,
         data_desc_cpv,
         data_desc_avlb,
-        data_desc_css,
         data_desc_icov,
+        data_desc_css,
         data_desc_fac_raw,
         data_desc_fac_nrm,
         data_desc_sig_fac,
@@ -84,6 +84,18 @@ if __name__ == "__main__":
             data_desc_pv=data_desc_preprocess,
             dst_db=cfg_dbs.user,
             table_avlb=cfg_tables.avlb,
+        )
+    elif args.switch == "icov":
+        from solutions.icov import main_process_icov
+
+        data_desc_preprocess.lag = 240
+        main_process_icov(
+            span=span,
+            codes=codes,
+            cfg_icov=cfg.icov,
+            data_desc_pv=data_desc_preprocess,
+            dst_db=cfg_dbs.user,
+            table_icov=cfg_tables.icov,
         )
     elif args.switch == "css":
         from solutions.css import main_process_css
@@ -112,18 +124,6 @@ if __name__ == "__main__":
             dst_db=cfg_dbs.user,
             table_srets=cfg_tables.srets,
             project_data_dir=cfg.project_data_dir,
-        )
-    elif args.switch == "icov":
-        from solutions.icov import main_process_icov
-
-        data_desc_preprocess.lag = 240
-        main_process_icov(
-            span=span,
-            codes=codes,
-            cfg_icov=cfg.icov,
-            data_desc_pv=data_desc_preprocess,
-            dst_db=cfg_dbs.user,
-            table_icov=cfg_tables.icov,
         )
     elif args.switch == "factors":
         if args.type == "raw":

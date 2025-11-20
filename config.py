@@ -37,8 +37,8 @@ check_and_mkdir(cfg.project_data_dir)
 
 cfg_tables = CCfgTables(
     avlb=f"{cfg.pid}_tbl_avlb_{cfg.vid}",
-    css=f"{cfg.pid}_tbl_css_{cfg.vid}",
     icov=f"{cfg.pid}_tbl_icov_{cfg.vid}",
+    css=f"{cfg.pid}_tbl_css_{cfg.vid}",
     srets=f"{cfg.pid}_tbl_srets_{cfg.vid}",
     fac_raw=f"{cfg.pid}_tbl_fac_raw_{cfg.vid}",
     fac_nrm=f"{cfg.pid}_tbl_fac_nrm_{cfg.vid}",
@@ -75,19 +75,19 @@ data_desc_avlb = CDataDescriptor(
     lag=20,
     data_view_type="data3d",
 )
-data_desc_css = CDataDescriptor(
-    db_name=cfg_dbs.user,
-    table_name=cfg_tables.css,
-    codes=["VOL", "VMA", "TOTWGT"],
-    fields=["val"],
-    lag=60,
-    data_view_type="data3d",
-)
 data_desc_icov = CDataDescriptor(
     db_name=cfg_dbs.user,
     table_name=cfg_tables.icov,
     codes=cfg.codes,
     fields=[_.lower() for _ in cfg.codes],
+    lag=60,
+    data_view_type="data3d",
+)
+data_desc_css = CDataDescriptor(
+    db_name=cfg_dbs.user,
+    table_name=cfg_tables.css,
+    codes=["VOL", "VMA", "TOTWGT"],
+    fields=["val"],
     lag=60,
     data_view_type="data3d",
 )
