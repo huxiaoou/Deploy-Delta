@@ -152,7 +152,7 @@ class CMultiEvaluator:
         plot_nav(
             nav_data=nav_data,
             xtick_count_min=60,
-            ylim=(1.0, 1.9),
+            ylim=(0.80, 1.90),
             ytick_spread=0.10,
             fig_name=f"sim_cmplx.{self.save_id}",
             save_dir=os.path.join(self.project_data_dir, "plots"),

@@ -300,7 +300,6 @@ if __name__ == "__main__":
                 vid=cfg.vid,
             )
             mulit_evaluator.main()
-
     elif args.switch == "optimize":
         from solutions.optimize import main_process_optimize_sec_wgt
         from config import sectors
