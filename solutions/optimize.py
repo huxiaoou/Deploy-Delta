@@ -74,9 +74,8 @@ class COptimizerSecWgt(SignalStrategy):
             wgt = w / w.abs().sum()
             return wgt[self.sectors]
         elif method == "sg":
-            sg: pd.Series = np.sign(ret_data.mean())  # type:ignore
-            sd: pd.Series = ret_data.std()
-            w: pd.Series = sg / sd
+            n = ret_data.shape[0]
+            w: pd.Series = np.arange(n) @ ret_data # type:ignore
             wgt = w / w.abs().sum()
             return wgt[self.sectors]
         else:
