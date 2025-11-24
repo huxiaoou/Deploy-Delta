@@ -71,5 +71,5 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') signals optimized"
 # python main.py --bgn $end_date --end $end_date operations --type cls
 # echo "$(date +'%Y-%m-%d %H:%M:%S') signals saved to csv"
 
-# python main.py --bgn $bgn_date --end $end_date simulations --type stg --omit
-# echo "$(date +'%Y-%m-%d %H:%M:%S') complex simualations done"
+python main.py --bgn $bgn_date --end $end_date simulations --type stg --omit
+echo "$(date +'%Y-%m-%d %H:%M:%S') complex simualations done"
