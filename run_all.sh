@@ -49,11 +49,11 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') css generated"
 python main.py --bgn $bgn_date_avlb --end $end_date srets
 echo "$(date +'%Y-%m-%d %H:%M:%S') srets generated"
 
-# python main.py --bgn $bgn_date_fac --end $end_date factors --type raw
-# echo "$(date +'%Y-%m-%d %H:%M:%S') factor raw generated"
+python main.py --bgn $bgn_date_fac --end $end_date factors --type raw
+echo "$(date +'%Y-%m-%d %H:%M:%S') factor raw generated"
 
-# python main.py --bgn $bgn_date_fac --end $end_date factors --type nrm
-# echo "$(date +'%Y-%m-%d %H:%M:%S') factor nrm generated"
+python main.py --bgn $bgn_date_fac --end $end_date factors --type nrm
+echo "$(date +'%Y-%m-%d %H:%M:%S') factor nrm generated"
 
 # python main.py --bgn $bgn_date_fac --end $end_date signals --type fac
 # echo "$(date +'%Y-%m-%d %H:%M:%S') signals generated"
