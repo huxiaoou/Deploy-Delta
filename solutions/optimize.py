@@ -20,6 +20,7 @@ class COptimizerSecWgt(SignalStrategy):
         cfg_optimizer: CCfgOptimizer,
         data_desc_srets: CDataDescriptor,
     ):
+        self.cfg_optimizer: CCfgOptimizer
         self.data_desc_srets: CDataDescriptor
         super().__init__(
             sectors,
@@ -75,7 +76,7 @@ class COptimizerSecWgt(SignalStrategy):
             return wgt[self.sectors]
         elif method == "sg":
             n = ret_data.shape[0]
-            w: pd.Series = np.arange(n) @ ret_data # type:ignore
+            w: pd.Series = np.arange(n) @ ret_data  # type:ignore
             wgt = w / w.abs().sum()
             return wgt[self.sectors]
         else:
