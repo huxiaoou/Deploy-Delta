@@ -55,6 +55,9 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') factor raw generated"
 python main.py --bgn $bgn_date_fac --end $end_date factors --type nrm
 echo "$(date +'%Y-%m-%d %H:%M:%S') factor nrm generated"
 
+python main.py --bgn $bgn_date_fac --end $end_date factors --type agg
+echo "$(date +'%Y-%m-%d %H:%M:%S') factor agg generated"
+
 # python main.py --bgn $bgn_date_fac --end $end_date signals --type fac
 # echo "$(date +'%Y-%m-%d %H:%M:%S') signals generated"
 

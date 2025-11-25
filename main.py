@@ -27,7 +27,7 @@ def parse_args():
 
     # switch: factors
     arg_parser_sub = arg_parser_subs.add_parser(name="factors", help="Calculate factors")
-    arg_parser_sub.add_argument("--type", type=str, choices=("raw", "nrm"))
+    arg_parser_sub.add_argument("--type", type=str, choices=("raw", "nrm", "agg"))
 
     # switch: signals
     arg_parser_sub = arg_parser_subs.add_parser(name="signals", help="generate signals")
@@ -51,6 +51,8 @@ def parse_args():
 if __name__ == "__main__":
     from config import (
         cfg,
+        sectors,
+        universe_sector,
         cfg_tables,
         cfg_dbs,
         data_desc_preprocess,
@@ -113,7 +115,6 @@ if __name__ == "__main__":
         )
     elif args.switch == "srets":
         from solutions.srets import main_process_srets
-        from config import universe_sector
 
         data_desc_preprocess.lag, data_desc_avlb.lag = 1, 1
         main_process_srets(
@@ -142,7 +143,6 @@ if __name__ == "__main__":
             )
         elif args.type == "nrm":
             from solutions.nrm import main_process_factors_nrm
-            from config import universe_sector
 
             main_process_factors_nrm(
                 span=span,
@@ -153,6 +153,20 @@ if __name__ == "__main__":
                 universe_sector=universe_sector,
                 dst_db=cfg_dbs.user,
                 table_fac_neu=cfg_tables.fac_nrm,
+            )
+        elif args.type == "agg":
+            from solutions.agg import main_process_factors_agg
+
+            main_process_factors_agg(
+                span=span,
+                sectors=sectors,
+                cfg_factors=cfg.factors,
+                data_desc_avlb=data_desc_avlb,
+                data_desc_fac_nrm=data_desc_fac_nrm,
+                data_desc_pv=data_desc_preprocess,
+                universe_sector=universe_sector,
+                dst_db=cfg_dbs.user,
+                table_fac_agg=cfg_tables.fac_agg,
             )
     elif args.switch == "signals":
         if args.type == "fac":
@@ -169,7 +183,6 @@ if __name__ == "__main__":
             )
         elif args.type == "stg":
             from solutions.signals import main_process_signals_stg
-            from config import sectors, universe_sector
 
             main_process_signals_stg(
                 span=span,

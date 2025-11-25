@@ -86,6 +86,7 @@ class CCfgTables:
     srets: str
     fac_raw: str
     fac_nrm: str
+    fac_agg: str
     sig_fac: str
     sig_stg: str
     sim_fac: str
