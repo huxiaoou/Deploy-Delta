@@ -66,6 +66,7 @@ if __name__ == "__main__":
         data_desc_srets,
         data_desc_fac_raw,
         data_desc_fac_nrm,
+        data_desc_fac_agg,
         data_desc_sig_fac,
         data_desc_sig_stg,
         data_desc_sim_fac,
@@ -202,10 +203,10 @@ if __name__ == "__main__":
             from solutions.qsim import CSimQuick
 
             sim_quick = CSimQuick(
-                codes=codes,
+                sectors=sectors,
                 cfg_factors=cfg.factors,
-                data_desc_pv=data_desc_preprocess,
-                data_desc_sig_fac=data_desc_sig_fac,
+                data_desc_srets=data_desc_srets,
+                data_desc_fac_agg=data_desc_fac_agg,
                 tgt_rets=cfg.tgt_rets,
                 cost_rate=cfg.cost_rate_sub,
                 dst_db=cfg_dbs.user,
