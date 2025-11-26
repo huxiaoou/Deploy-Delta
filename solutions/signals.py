@@ -146,7 +146,8 @@ class CSignalsStg(SignalStrategy):
             data["inner_wgt"] = data["amt_avlb"]
             data = data.merge(right=sec_wgt, left_on="sector", right_index=True, how="left")
             raw_wgt = data["inner_wgt"] * data["sector_wgt"]
-            adj_wgt = raw_wgt / raw_wgt.abs().sum()
+            abs_sum = raw_wgt.abs().sum()
+            adj_wgt = raw_wgt / (abs_sum if abs_sum > 0 else 1)
             opt_wgt = adj_wgt * tot_wgt
             self.update_factor(tgt_ret, opt_wgt[self.codes].to_numpy())
 

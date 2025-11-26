@@ -113,7 +113,7 @@ qsim:
   win: 5
 optimizer:
   window: 10
-  lbd: 0.8
+  lbd: 0.005
 tgt_rets: [opn, cls]
 cost_rate:
   sub: 0.0000
