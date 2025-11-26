@@ -141,8 +141,12 @@ class CSimQuick:
             # cls(opn) return @ "T+w+1 15:00:00" means "cls[T+1] -> cls[T+1+w]"("opn[T+1] -> opn[T+w+1]"), in which w = ret_win.
             # so use shift = 2 to align
             sig_delay_data = sig_data.shift(1 + ret_win).fillna(0)
+            wgt_delay_data = avlb_amts.shift(1 + ret_win).fillna(0)
             fac_sim_data = sim_ret(
-                sig_data=sig_delay_data, ret_data=ret_data, wgt_data=avlb_amts, cost_rate=self.cost_rate
+                sig_data=sig_delay_data,
+                ret_data=ret_data,
+                wgt_data=wgt_delay_data,
+                cost_rate=self.cost_rate,
             )
             sim_data[sim_args.save_id] = fac_sim_data
 
