@@ -113,12 +113,12 @@ if __name__ == "__main__":
         )
     elif args.switch == "srets":
         from solutions.srets import main_process_srets
-        from config import universe_sector
+        from config import sectors, universe_sector
 
         data_desc_preprocess.lag, data_desc_avlb.lag = 1, 1
         main_process_srets(
             span=span,
-            codes=codes,
+            sectors=sectors,
             universe_sector=universe_sector,
             data_desc_pv=data_desc_preprocess,
             data_desc_avlb=data_desc_avlb,
