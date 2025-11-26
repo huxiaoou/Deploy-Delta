@@ -207,8 +207,6 @@ if __name__ == "__main__":
                 cfg_factors=cfg.factors,
                 data_desc_srets=data_desc_srets,
                 data_desc_fac_agg=data_desc_fac_agg,
-                data_desc_avlb=data_desc_avlb,
-                data_desc_pv=data_desc_preprocess,
                 universe_sector=universe_sector,
                 tgt_rets=cfg.tgt_rets,
                 cost_rate=cfg.cost_rate_sub,

@@ -43,8 +43,6 @@ class CSimQuick:
         tgt_rets: list[str],
         data_desc_srets: CDataDescriptor,
         data_desc_fac_agg: CDataDescriptor,
-        data_desc_avlb: CDataDescriptor,
-        data_desc_pv: CDataDescriptor,
         universe_sector: dict[str, str],
         cost_rate: float,
         dst_db: str,
@@ -56,8 +54,6 @@ class CSimQuick:
         self.cfg_factors = cfg_factors
         self.data_desc_srets = data_desc_srets
         self.data_desc_fac_agg = data_desc_fac_agg
-        self.data_desc_avlb = data_desc_avlb
-        self.data_desc_pv = data_desc_pv
         self.universe_sector = universe_sector
         self.tgt_rets = tgt_rets
         self.cost_rate = cost_rate
@@ -66,22 +62,25 @@ class CSimQuick:
         self.project_data_dir = project_data_dir
         self.vid = vid
 
-    def load_ret(self, span: tuple[str, str], ret_win: int) -> dict[str, pd.DataFrame]:
+    def load_rets_and_avlb_amts(self, span: tuple[str, str], ret_win: int) -> dict[str, pd.DataFrame]:
         b, e = span
         bgn, end = f"{b[0:4]}-{b[4:6]}-{b[6:8]}", f"{e[0:4]}-{e[4:6]}-{e[6:8]}"
         data = fetch(
             lib=self.data_desc_srets.db_name,
             table=self.data_desc_srets.table_name,
-            names=",".join(["datetime", "code", "opn", "cls"]),
+            names=",".join(["datetime", "code", "opn", "cls", "amt"]),
             conds=f"datetime >= '{bgn} 15:00:00' and datetime <= '{end} 15:00:00'",
         )
         opn_ret = pd.pivot_table(data=data, index="datetime", columns="code", values="opn")[self.sectors]
         cls_ret = pd.pivot_table(data=data, index="datetime", columns="code", values="cls")[self.sectors]
+        amt = pd.pivot_table(data=data, index="datetime", columns="code", values="amt")[self.sectors]
         opn_ret_adj = opn_ret.dropna(axis=0, how="all").fillna(0).rolling(window=ret_win, min_periods=1).mean()
         cls_ret_adj = cls_ret.dropna(axis=0, how="all").fillna(0).rolling(window=ret_win, min_periods=1).mean()
-        return {
+        amt_adj = amt.dropna(axis=0, how="all").fillna(0)
+        return {  # type:ignore
             "opn": opn_ret_adj,
             "cls": cls_ret_adj,
+            "amt": amt_adj,
         }
 
     def load_sig(self, span: tuple[str, str]) -> dict[str, pd.DataFrame]:
@@ -98,36 +97,6 @@ class CSimQuick:
         res: dict[str, pd.DataFrame] = {}
         for factor in factors:
             res[factor] = piv_data[factor][self.sectors]  # type:ignore
-        return res
-
-    def load_amt(self, span: tuple[str, str]) -> pd.DataFrame:
-        b, e = span
-        bgn, end = f"{b[0:4]}-{b[4:6]}-{b[6:8]}", f"{e[0:4]}-{e[4:6]}-{e[6:8]}"
-        data = fetch(
-            lib=self.data_desc_pv.db_name,
-            table=self.data_desc_pv.table_name,
-            names=["datetime", "code", "amt_major"],
-            conds=f"datetime >= '{bgn} 15:00:00' and datetime <= '{end} 15:00:00'",
-        )
-        return data
-
-    def load_avlb(self, span: tuple[str, str]) -> pd.DataFrame:
-        b, e = span
-        bgn, end = f"{b[0:4]}-{b[4:6]}-{b[6:8]}", f"{e[0:4]}-{e[4:6]}-{e[6:8]}"
-        data = fetch(
-            lib=self.data_desc_avlb.db_name,
-            table=self.data_desc_avlb.table_name,
-            names=["datetime", "code", "avlb"],
-            conds=f"datetime >= '{bgn} 15:00:00' and datetime <= '{end} 15:00:00'",
-        )
-        return data
-
-    def get_avlb_amts(self, avlb: pd.DataFrame, amts: pd.DataFrame) -> pd.DataFrame:
-        avlb_amts = pd.merge(left=avlb, right=amts, on=["datetime", "code"], how="left").fillna(0)
-        avlb_amts["sector"] = avlb_amts["code"].map(lambda z:self.universe_sector[z])
-        sec_amts = avlb_amts.groupby(by=["datetime", "sector"]).apply(lambda z: z["amt_major"] @ z["avlb"])
-        piv = sec_amts.reset_index().pivot_table(values=0, index="datetime", columns="sector", aggfunc="mean")
-        res = piv[self.sectors]
         return res
 
     def get_net_ret(
@@ -156,17 +125,15 @@ class CSimQuick:
         return 0
 
     def main(self, span: tuple[str, str], ret_win: int):
-        rets = self.load_ret(span=span, ret_win=ret_win)
+        rets_and_avlb_amts = self.load_rets_and_avlb_amts(span=span, ret_win=ret_win)
         sigs = self.load_sig(span=span)
-        amts = self.load_amt(span=span)
-        avlb = self.load_avlb(span=span)
-        avlb_amts = self.get_avlb_amts(avlb=avlb, amts=amts)
+        avlb_amts = rets_and_avlb_amts["amt"]
         sim_args_grp = [
             CSimArgs(sig=factor, ret=tgt_ret) for factor, tgt_ret in product(self.cfg_factors.to_list(), self.tgt_rets)
         ]
         sim_data: dict[str, pd.DataFrame] = {}
         for sim_args in tqdm(sim_args_grp):
-            ret_data = rets[sim_args.ret]
+            ret_data = rets_and_avlb_amts[sim_args.ret]
             sig_data = sigs[sim_args.sig]
             if len(ret_data) != len(sig_data):
                 raise ValueError(f"length of sig != length of ret")
@@ -174,7 +141,9 @@ class CSimQuick:
             # cls(opn) return @ "T+w+1 15:00:00" means "cls[T+1] -> cls[T+1+w]"("opn[T+1] -> opn[T+w+1]"), in which w = ret_win.
             # so use shift = 2 to align
             sig_delay_data = sig_data.shift(1 + ret_win).fillna(0)
-            fac_sim_data = sim_ret(sig_data=sig_delay_data, ret_data=ret_data, wgt_data=avlb_amts, cost_rate=self.cost_rate)
+            fac_sim_data = sim_ret(
+                sig_data=sig_delay_data, ret_data=ret_data, wgt_data=avlb_amts, cost_rate=self.cost_rate
+            )
             sim_data[sim_args.save_id] = fac_sim_data
 
         save_data3d_to_db_with_key_as_code(data_3d=sim_data, db_name=self.dst_db, table_name=self.table_sim_fac)
