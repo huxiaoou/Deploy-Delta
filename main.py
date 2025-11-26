@@ -31,7 +31,7 @@ def parse_args():
 
     # switch: signals
     arg_parser_sub = arg_parser_subs.add_parser(name="signals", help="generate signals")
-    arg_parser_sub.add_argument("--type", type=str, choices=("fac", "stg"))
+    arg_parser_sub.add_argument("--type", type=str, choices=("stg",))
 
     # switch: simulations
     arg_parser_sub = arg_parser_subs.add_parser(name="simulations", help="do simulations")
@@ -170,19 +170,7 @@ if __name__ == "__main__":
                 table_fac_agg=cfg_tables.fac_agg,
             )
     elif args.switch == "signals":
-        if args.type == "fac":
-            from solutions.signals import main_process_signals_fac
-
-            main_process_signals_fac(
-                span=span,
-                codes=codes,
-                cfg_factors=cfg.factors,
-                data_desc_avlb=data_desc_avlb,
-                data_desc_fac_nrm=data_desc_fac_nrm,
-                dst_db=cfg_dbs.user,
-                table_sig_fac=cfg_tables.sig_fac,
-            )
-        elif args.type == "stg":
+        if args.type == "stg":
             from solutions.signals import main_process_signals_stg
 
             main_process_signals_stg(
