@@ -19,14 +19,17 @@ class COptimizerSecWgt(SignalStrategy):
         tgt_rets: list[str],
         cfg_optimizer: CCfgOptimizer,
         data_desc_srets: CDataDescriptor,
+        data_desc_fac_agg: CDataDescriptor,
     ):
         self.cfg_optimizer: CCfgOptimizer
         self.data_desc_srets: CDataDescriptor
+        self.data_desc_fac_agg: CDataDescriptor
         super().__init__(
             sectors,
             tgt_rets,
             cfg_optimizer,
             data_desc_srets,
+            data_desc_fac_agg,
         )
         self.sectors = sectors
         p = len(self.sectors)
@@ -45,6 +48,7 @@ class COptimizerSecWgt(SignalStrategy):
 
         # subscribe data
         self.subscribe_data("sret_data", self.data_desc_srets.to_args())
+        self.subscribe_data("fac_agg", self.data_desc_fac_agg.to_args())
 
         # create factor tables to record factor
         self.create_factor_table(self.tgt_rets)
@@ -89,6 +93,7 @@ def main_process_optimize_sec_wgt(
     tgt_rets: list[str],
     cfg_optimizer: CCfgOptimizer,
     data_desc_srets: CDataDescriptor,
+    data_desc_fac_agg: CDataDescriptor,
     dst_db: str,
     table_optimize: str,
 ):
@@ -118,6 +123,7 @@ def main_process_optimize_sec_wgt(
         tgt_rets=tgt_rets,
         cfg_optimizer=cfg_optimizer,
         data_desc_srets=data_desc_srets,
+        data_desc_fac_agg=data_desc_fac_agg,
     )
     optimizer.set_name("optimizer")
     mat.add_component(optimizer)

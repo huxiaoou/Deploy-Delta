@@ -327,6 +327,7 @@ if __name__ == "__main__":
             tgt_rets=cfg.tgt_rets,
             cfg_optimizer=cfg.optimizer,
             data_desc_srets=data_desc_srets,
+            data_desc_fac_agg=data_desc_fac_agg,
             dst_db=cfg_dbs.user,
             table_optimize=cfg_tables.optimize,
         )
