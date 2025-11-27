@@ -55,11 +55,10 @@ class CSignalsStg(SignalStrategy):
             ).fillna(0)
             data["amt_avlb"] = data["avlb"] * data["amt"]
             data["sector"] = data.index.map(lambda z: self.universe_sector[z])
-            data["inner_wgt"] = data["amt_avlb"]
+            data["inner_wgt"] = data["amt_avlb"] / data["amt_avlb"].sum()
             data = data.merge(right=sec_wgt, left_on="sector", right_index=True, how="left")
             raw_wgt = data["inner_wgt"] * data["sector_wgt"]
-            adj_wgt = raw_wgt / raw_wgt.abs().sum()
-            opt_wgt = adj_wgt * tot_wgt
+            opt_wgt = raw_wgt * tot_wgt
             self.update_factor(tgt_ret, opt_wgt[self.codes].to_numpy())
 
 

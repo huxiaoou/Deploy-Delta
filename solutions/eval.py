@@ -46,6 +46,12 @@ def plot_nav(
     return
 
 
+def cal_limit(data: pd.DataFrame, spread: float) -> tuple[float, float]:
+    yl = spread * (int(data.min().min() / spread))
+    yd = spread * (int(data.max().max() / spread) + 1)
+    return yl, yd
+
+
 class CMultiEvaluator:
     SEP = "=" * 60
     INDICATORS = ["hpr", "retMean", "retStd", "retAnnual", "volAnnual", "sharpe", "calmar", "mdd"]
@@ -127,7 +133,7 @@ class CMultiEvaluator:
         print(rets_corr)
         return
 
-    def main(self):
+    def main(self, subplot_since: str = "2025-01-01"):
         res: dict[str, dict] = {}
         ret_data = {}
         for perf_path, short_id in zip(self.perf_paths, self.short_ids):
@@ -149,24 +155,28 @@ class CMultiEvaluator:
 
         # plot-ALL
         nav_data = (portfolios_rets + 1).cumprod()
+        spread = 0.05
+        ylim = cal_limit(nav_data, spread=spread)
         plot_nav(
             nav_data=nav_data,
             xtick_count_min=60,
-            ylim=(0.80, 1.90),
-            ytick_spread=0.10,
+            ylim=ylim,
+            ytick_spread=spread,
             fig_name=f"sim_cmplx.{self.save_id}",
             save_dir=os.path.join(self.project_data_dir, "plots"),
         )
 
         # plot-SINCE
-        latest_ret = portfolios_rets.truncate(before="2025-01-01")
+        latest_ret = portfolios_rets.truncate(before=subplot_since)
         latest_nav = (latest_ret + 1).cumprod()
+        spread = 0.005
+        ylim = cal_limit(latest_nav, spread=spread)
         plot_nav(
             nav_data=latest_nav,
             xtick_count_min=20,
-            ylim=(0.99, 1.06),
+            ylim=ylim,
             ytick_spread=0.005,
-            fig_name=f"sim_cmplx_since_2025.{self.save_id}",
+            fig_name=f"sim_cmplx_since_{subplot_since}.{self.save_id}",
             save_dir=os.path.join(self.project_data_dir, "plots"),
         )
         return 0

@@ -80,8 +80,10 @@ class COptimizerSecWgt(SignalStrategy):
             return wgt[self.sectors]
         elif method == "sg":
             n = ret_data.shape[0]
-            w: pd.Series = np.arange(n) @ ret_data  # type:ignore
-            wgt = w / w.abs().sum()
+            w: pd.Series = (np.arange(n) / n) @ ret_data  # type:ignore
+            w[w.abs() <= self.cfg_optimizer.lbd] = 0.0
+            abs_sum = w.abs().sum()
+            wgt = w / (abs_sum if abs_sum > 0 else 1.0)
             return wgt[self.sectors]
         else:
             raise ValueError(f"Invalid method = {method}")

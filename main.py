@@ -255,12 +255,12 @@ if __name__ == "__main__":
                 ret_lbl="日收益率",
                 date_lbl="date",
                 short_ids=["open", "close", "dual"],
-                by_year_ids=["open"],
+                by_year_ids=["close"],
                 project_data_dir=cfg.project_data_dir,
                 src_id="csim",
                 vid=cfg.vid,
             )
-            mulit_evaluator.main()
+            mulit_evaluator.main(subplot_since="2025-01-01")
         elif args.type == "stg2":
             import os
             from qtools_sxzq.qsimulation import TExePriceType, CSignal, CMgrMktData, CMgrMajContract, CSimulation
