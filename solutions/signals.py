@@ -143,7 +143,7 @@ class CSignalsStg(SignalStrategy):
             ).fillna(0)
             data["amt_avlb"] = data["avlb"] * data["amt"]
             data["sector"] = data.index.map(lambda z: self.universe_sector[z])
-            data["inner_wgt"] = data.groupby("sector")["amt_avlb"].apply(lambda z: z / z.abs().sum())
+            data["inner_wgt"] = data["amt_avlb"]
             data = data.merge(right=sec_wgt, left_on="sector", right_index=True, how="left")
             raw_wgt = data["inner_wgt"] * data["sector_wgt"]
             abs_sum = raw_wgt.abs().sum()
