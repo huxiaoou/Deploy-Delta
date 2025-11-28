@@ -304,15 +304,16 @@ if __name__ == "__main__":
             mulit_evaluator.main()
     elif args.switch == "optimize":
         from solutions.optimize import main_process_optimize_sec_wgt
-        from config import sectors
 
         main_process_optimize_sec_wgt(
             span=span,
             sectors=sectors,
+            factors=cfg.factors.to_list(),
             tgt_rets=cfg.tgt_rets,
             cfg_optimizer=cfg.optimizer,
             data_desc_srets=data_desc_srets,
             data_desc_fac_agg=data_desc_fac_agg,
+            data_desc_sim_fac=data_desc_sim_fac,
             dst_db=cfg_dbs.user,
             table_optimize=cfg_tables.optimize,
         )
