@@ -94,7 +94,7 @@ class COptimizerSecWgt(SignalStrategy):
             fac_sign: pd.Series = np.sign(fac_lcov)  # type:ignore
             fac_adj = fac_agg @ to_diag_df(v=fac_sign.to_numpy(), names=self.factors)
             fac_rnk = fac_adj.rank()
-            fac_neu = fac_rnk - fac_rnk.median()
+            fac_neu = np.sign(fac_rnk - fac_rnk.median())
             fac_wgt = fac_neu / fac_neu.abs().sum()
             sec_wgt = fac_wgt @ pd.Series(data=1, index=self.factors)
             abs_sum = sec_wgt.abs().sum()
