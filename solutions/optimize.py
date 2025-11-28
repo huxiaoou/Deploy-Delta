@@ -91,7 +91,8 @@ class COptimizerSecWgt(SignalStrategy):
         for tgt_ret in self.tgt_rets:
             fac_score = self.get_fac_score(ret=tgt_ret, length=self.cfg_optimizer.window)
             fac_score_mean = fac_score.mean()
-            fac_sign = np.sign(fac_score_mean)
+            # fac_sign = np.sign(fac_score_mean)
+            fac_sign = pd.Series(data=1, index=self.factors)
             fac_adj = fac_agg @ to_diag_df(v=fac_sign.to_numpy(), names=self.factors)
             fac_rnk = fac_adj.rank()
             fac_neu = np.sign(fac_rnk - fac_rnk.median())
