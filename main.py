@@ -67,7 +67,6 @@ if __name__ == "__main__":
         data_desc_fac_raw,
         data_desc_fac_nrm,
         data_desc_fac_agg,
-        data_desc_sig_fac,
         data_desc_sig_stg,
         data_desc_sim_fac,
         data_desc_optimize,

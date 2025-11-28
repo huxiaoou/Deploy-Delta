@@ -124,14 +124,6 @@ data_desc_fac_agg = CDataDescriptor(
     lag=20,
     data_view_type="data3d",
 )
-data_desc_sig_fac = CDataDescriptor(
-    db_name=cfg_dbs.user,
-    table_name=cfg_tables.sig_fac,
-    codes=cfg.codes,
-    fields=cfg.factors.to_list(),
-    lag=20,
-    data_view_type="data3d",
-)
 data_desc_sig_stg = CDataDescriptor(
     db_name=cfg_dbs.user,
     table_name=cfg_tables.sig_stg,
