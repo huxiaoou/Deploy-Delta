@@ -89,7 +89,7 @@ class COptimizerSecWgt(SignalStrategy):
     def on_day_end(self):
         fac_agg = self.get_fac_agg(periods=1)
         for tgt_ret in self.tgt_rets:
-            fac_score = self.get_fac_score(ret=tgt_ret, length=20)
+            fac_score = self.get_fac_score(ret=tgt_ret, length=240)
             fac_lcov = cal_linear_cov(x=fac_score.cumsum())
             fac_sign: pd.Series = np.sign(fac_lcov)  # type:ignore
             fac_adj = fac_agg @ to_diag_df(v=fac_sign.to_numpy(), names=self.factors)
