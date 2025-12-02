@@ -5,38 +5,24 @@ from itertools import product
 from tqdm import tqdm
 from qtools_sxzq.qwidgets import check_and_mkdir
 from qtools_sxzq.qdataviewer import fetch
-from qtools_sxzq.qdata import CDataDescriptor, save_data3d_to_db_with_key_as_code
+from qtools_sxzq.qdata import CDataDescriptor, save_df_to_db
 from typedef import CCfgFactors, CSimArgs
 from solutions.eval import plot_nav
 
 
-def weightd_ic(x: pd.DataFrame, y: pd.DataFrame, w: pd.DataFrame) -> pd.Series:
+def weightd_ic_comp(x: pd.DataFrame, y: pd.DataFrame, w: pd.DataFrame) -> pd.DataFrame:
     _w = w.div(w.sum(axis=1), axis=0)
     xyb = (x * _w * y).sum(axis=1)
     xxb = (x * _w * x).sum(axis=1)
     yyb = (y * _w * y).sum(axis=1)
     xb = (x * _w).sum(axis=1)
     yb = (y * _w).sum(axis=1)
-    cov_xy = xyb - xb * yb
     cov_xx = xxb - xb * xb
     cov_yy = yyb - yb * yb
-    ic = cov_xy / np.sqrt(cov_xx * cov_yy)
-
-    # xz = x.subtract(xb, axis=0).div(np.sqrt(cov_xx), axis=0)
-    # yz = y.subtract(yb, axis=0).div(np.sqrt(cov_yy), axis=0)
-    # ic_comp = xz * _w * yz
-    return ic.fillna(0)
-
-
-def sim_ret(sig_data: pd.DataFrame, ret_data: pd.DataFrame, wgt_data: pd.DataFrame, cost_rate: float) -> pd.DataFrame:
-    raw_ret = weightd_ic(x=sig_data, y=ret_data, w=wgt_data)
-    wgt_data_prev = sig_data.shift(1).fillna(0)
-    wgt_diff = sig_data - wgt_data_prev
-    dlt_wgt = wgt_diff.abs().sum(axis=1)
-    cost = dlt_wgt * cost_rate
-    net_ret = raw_ret - cost
-    sim_data = pd.DataFrame({"raw_ret": raw_ret, "dlt_wgt": dlt_wgt, "cost": cost, "net_ret": net_ret})
-    return sim_data
+    xz = x.subtract(xb, axis=0).div(np.sqrt(cov_xx), axis=0)
+    yz = y.subtract(yb, axis=0).div(np.sqrt(cov_yy), axis=0)
+    ic_comp = xz * _w * yz
+    return ic_comp.fillna(0)
 
 
 class CSimQuick:
@@ -65,6 +51,7 @@ class CSimQuick:
         self.table_sim_fac = table_sim_fac
         self.project_data_dir = project_data_dir
         self.vid = vid
+        self.sim_data: dict[str, dict[str, pd.DataFrame]] = {tgt_ret: {} for tgt_ret in self.tgt_rets}
 
     def load_rets_and_avlb_amts(self, span: tuple[str, str], ret_win: int) -> dict[str, pd.DataFrame]:
         b, e = span
@@ -103,13 +90,17 @@ class CSimQuick:
             res[factor] = piv_data[factor][self.sectors]  # type:ignore
         return res
 
-    def get_net_ret(
-        self, tgt_ret: str, sim_args_grp: list[CSimArgs], sim_data: dict[str, pd.DataFrame]
-    ) -> pd.DataFrame:
+    def covert_to_db_format(self) -> pd.DataFrame:
+        data = {}
+        for tgt_ret, tgt_ret_data in self.sim_data.items():
+            for factor, factor_data in tgt_ret_data.items():
+                data[f"{factor}_{tgt_ret}"] = factor_data.stack()
+        return pd.DataFrame(data).reset_index()
+
+    def get_net_ret(self, tgt_ret: str) -> pd.DataFrame:
         net_ret_data = {}
-        for sim_args in sim_args_grp:
-            if sim_args.ret == tgt_ret:
-                net_ret_data[sim_args.save_id] = sim_data[sim_args.save_id]["net_ret"]
+        for factor, factor_data in self.sim_data[tgt_ret].items():
+            net_ret_data[factor] = factor_data.sum(axis=1)
         return pd.DataFrame(net_ret_data)
 
     def plot_by_tgt_ret(self, net_ret: pd.DataFrame, tgt_ret: str):
@@ -135,7 +126,6 @@ class CSimQuick:
         sim_args_grp = [
             CSimArgs(sig=factor, ret=tgt_ret) for factor, tgt_ret in product(self.cfg_factors.to_list(), self.tgt_rets)
         ]
-        sim_data: dict[str, pd.DataFrame] = {}
         for sim_args in tqdm(sim_args_grp):
             ret_data = rets_and_avlb_amts[sim_args.ret]
             sig_data = sigs[sim_args.sig]
@@ -146,16 +136,14 @@ class CSimQuick:
             # so use shift = 2 to align
             sig_delay_data = sig_data.shift(1 + ret_win).fillna(0)
             wgt_delay_data = avlb_amts.shift(1 + ret_win).fillna(0)
-            fac_sim_data = sim_ret(
-                sig_data=sig_delay_data,
-                ret_data=ret_data,
-                wgt_data=wgt_delay_data,
-                cost_rate=self.cost_rate,
+            self.sim_data[sim_args.ret][sim_args.sig] = weightd_ic_comp(
+                x=sig_delay_data,
+                y=ret_data,
+                w=wgt_delay_data,
             )
-            sim_data[sim_args.save_id] = fac_sim_data
-
-        save_data3d_to_db_with_key_as_code(data_3d=sim_data, db_name=self.dst_db, table_name=self.table_sim_fac)
+        df = self.covert_to_db_format()
+        save_df_to_db(df=df, db_name=self.dst_db, table_name=self.table_sim_fac)
         for tgt_ret in self.tgt_rets:
-            net_ret = self.get_net_ret(tgt_ret=tgt_ret, sim_args_grp=sim_args_grp, sim_data=sim_data)
+            net_ret = self.get_net_ret(tgt_ret=tgt_ret)
             self.plot_by_tgt_ret(net_ret=net_ret, tgt_ret=tgt_ret)
         return 0

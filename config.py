@@ -1,4 +1,5 @@
 import yaml
+from itertools import product
 from qtools_sxzq.qwidgets import check_and_mkdir
 from qtools_sxzq.qdata import CDataDescriptor, CMarketDescriptor
 from typedef import TUniverse, CCfgInstru, TSectors
@@ -135,8 +136,8 @@ data_desc_sig_stg = CDataDescriptor(
 data_desc_sim_fac = CDataDescriptor(
     db_name=cfg_dbs.user,
     table_name=cfg_tables.sim_fac,
-    codes=cfg.sim_codes_fac,
-    fields=["raw_ret", "dlt_wgt", "cost", "net_ret"],
+    codes=sectors,
+    fields=[f"{f}_{r}" for f, r in product(cfg.factors.to_list(), cfg.tgt_rets)],
     lag=365,
     data_view_type="data3d",
 )
