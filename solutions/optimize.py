@@ -67,8 +67,11 @@ class COptimizerSecWgt(SignalStrategy):
         return raw_data
 
     def get_fac_score(self, ret: str, length: int) -> pd.DataFrame:
-        data = self.sim_fac.get_window_df(field="net_ret", length=length, codes=self.sim_codes(ret))
-        return data
+        data = {}
+        for factor in self.factors:
+            data[factor] = self.sim_fac.get_window_df(field=f"{factor}_{ret}", codes=self.sectors, length=length).mean()
+        res = pd.DataFrame(data)
+        return res
 
     def init(self):
         # on every day
@@ -90,14 +93,8 @@ class COptimizerSecWgt(SignalStrategy):
         fac_agg = self.get_fac_agg(periods=1)
         for tgt_ret in self.tgt_rets:
             fac_score = self.get_fac_score(ret=tgt_ret, length=self.cfg_optimizer.window)
-            fac_score_mean = fac_score.mean()
-            # fac_sign = np.sign(fac_score_mean)
-            fac_sign = pd.Series(data=1, index=self.factors)
-            fac_adj = fac_agg @ to_diag_df(v=fac_sign.to_numpy(), names=self.factors)
-            fac_rnk = fac_adj.rank()
-            fac_neu = np.sign(fac_rnk - fac_rnk.median())
-            fac_wgt = fac_neu / fac_neu.abs().sum()
-            sec_wgt = fac_wgt @ pd.Series(data=1, index=self.factors)
+            fac_sign = fac_agg * fac_score
+            sec_wgt = fac_sign.sum(axis=1)
             abs_sum = sec_wgt.abs().sum()
             sec_wgt_adj = sec_wgt / (abs_sum if abs_sum > 0 else 1)
             self.update_factor(tgt_ret, sec_wgt_adj[self.sectors])

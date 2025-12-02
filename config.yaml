@@ -112,12 +112,12 @@ factors:
 qsim:
   win: 5
 optimizer:
-  window: 240
+  window: 120
   lbd: 0.010
 tgt_rets: [opn, cls]
 cost_rate:
   sub: 0.0000
-  pri: 0.0003
+  pri: 0.0000
 init_cash: 100_000_000.00
 src_tables:
   preprocess:
