@@ -82,8 +82,11 @@ class CFactorsRaw(SignalStrategy):
             factor_data[k] = self.update_header_from_factor(pv_header, pd.DataFrame(v))
 
         # --- save to DataView3d
-        self.pre_trans_factors = create_data_view(NdarrayData.from_dataframes(factor_data))
-        self.pre_trans_factors.align_with(self.pv)
+        if factor_data:
+            self.pre_trans_factors = create_data_view(NdarrayData.from_dataframes(factor_data))
+            self.pre_trans_factors.align_with(self.pv)
+        else:
+            self.pre_trans_factors = None
 
     def on_clock(self):
         safe_lag = self.cfg_factors.lag
@@ -100,9 +103,11 @@ class CFactorsRaw(SignalStrategy):
         pv["prc"] = (pv["ret"] + 1).cumprod()
         pv["aver_oi"] = pv["oi"].rolling(window=2).mean()
         pv["to_rate"] = robust_div(pv["vol"], pv["aver_oi"])
-        intermediary = {
-            k: self.pre_trans_factors.get_window_df(k, safe_lag)[self.codes] for k in self.pre_trans_factors.fields
-        }
+        intermediary = (
+            {k: self.pre_trans_factors.get_window_df(k, safe_lag)[self.codes] for k in self.pre_trans_factors.fields}
+            if self.pre_trans_factors
+            else {}
+        )
         other_kwargs = {**pv, **intermediary}
         for factor, (_, alg) in self.cfg_factors.mgr.items():
             fac_val = alg.cal_factor(**other_kwargs)

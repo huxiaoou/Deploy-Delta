@@ -21,6 +21,10 @@ def weightd_ic(x: pd.DataFrame, y: pd.DataFrame, w: pd.DataFrame) -> pd.Series:
     cov_xx = xxb - xb * xb
     cov_yy = yyb - yb * yb
     ic = cov_xy / np.sqrt(cov_xx * cov_yy)
+
+    # xz = x.subtract(xb, axis=0).div(np.sqrt(cov_xx), axis=0)
+    # yz = y.subtract(yb, axis=0).div(np.sqrt(cov_yy), axis=0)
+    # ic_comp = xz * _w * yz
     return ic.fillna(0)
 
 
