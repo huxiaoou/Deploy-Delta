@@ -69,7 +69,10 @@ class COptimizerSecWgt(SignalStrategy):
     def get_fac_score(self, ret: str, length: int) -> pd.DataFrame:
         data = {}
         for factor in self.factors:
-            data[factor] = self.sim_fac.get_window_df(field=f"{factor}_{ret}", codes=self.sectors, length=length).mean()
+            fac_ic_comp = self.sim_fac.get_window_df(field=f"{factor}_{ret}", codes=self.sectors, length=length)
+            mu = fac_ic_comp.mean()
+            sd = fac_ic_comp.std()
+            data[factor] = mu / sd
         res = pd.DataFrame(data)
         return res
 
