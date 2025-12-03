@@ -112,7 +112,7 @@ factors:
 qsim:
   win: 5
 optimizer:
-  window: 240
+  window: 120
   lbd: 0.010
 tgt_rets: [opn, cls]
 cost_rate:
