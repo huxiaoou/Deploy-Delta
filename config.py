@@ -44,7 +44,6 @@ cfg_tables = CCfgTables(
     fac_raw=f"{cfg.pid}_tbl_fac_raw_{cfg.vid}",
     fac_nrm=f"{cfg.pid}_tbl_fac_nrm_{cfg.vid}",
     fac_agg=f"{cfg.pid}_tbl_fac_agg_{cfg.vid}",
-    sig_fac=f"{cfg.pid}_tbl_sig_fac_{cfg.vid}",
     sig_stg=f"{cfg.pid}_tbl_sig_stg_{cfg.vid}",
     sim_fac=f"{cfg.pid}_tbl_sim_fac_{cfg.vid}",
     optimize=f"{cfg.pid}_tbl_optimize_{cfg.vid}",
