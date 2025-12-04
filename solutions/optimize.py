@@ -74,7 +74,7 @@ class COptimizerSecWgt(SignalStrategy):
             sd = fac_ic_comp.std()
             data[factor] = mu / sd
         ir = pd.DataFrame(data)
-        res = ir * (ir.abs().rank() >= self.cfg_optimizer.lbd)
+        res = ir * (ir.abs() >= self.cfg_optimizer.lbd)
         return res
 
     def init(self):
